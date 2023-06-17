@@ -1,3 +1,56 @@
-const App = () => ('hi')
+import { useEffect, useState } from 'react'
+import './styles/main.css'
+import NewTodoForm from './NewTodoForm';
+import TodoList from './TodoList';
 
-export default App;
+export default function App () {
+    const [todos, setTodos] = useState(
+        () => {
+            const localValue = localStorage.getItem('ITEMS');
+            if (localValue === null) return []
+
+            return JSON.parse(localValue)
+        }
+    )
+    useEffect(() => {
+        localStorage.setItem('ITEMS', JSON.stringify(todos))
+    }, [todos])
+    
+    function addTodo(title) {
+        setTodos((currentTodos) => {
+            return [
+                ...currentTodos,
+                { id: crypto.randomUUID(), title, completed: false }
+            ]
+        })
+    }
+
+    function toggleTodo(id, event) {
+        const completed = event.target.checked;
+
+        setTodos(currentTodos => currentTodos.map(todo => {
+            if (todo.id === id) {
+                todo.completed = completed;
+                return todo
+            } else {
+                return todo
+            }
+        }))
+    }
+
+    function deleteTodo(id) {
+        setTodos(currentTodos => currentTodos.filter(todo => {
+            if (todo.id !== id) {
+                return todo
+            }
+        }))
+    }
+
+    return (
+        <>
+            <NewTodoForm onSubmit={addTodo}/>
+            <h1 className="header">Todo List</h1>
+            <TodoList todos={todos} toggleTodo={toggleTodo} deleteTodo={deleteTodo} />
+        </>
+    );
+}
